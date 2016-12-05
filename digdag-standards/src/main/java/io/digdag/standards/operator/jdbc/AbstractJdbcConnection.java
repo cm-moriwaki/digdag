@@ -138,7 +138,7 @@ public abstract class AbstractJdbcConnection
     {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             setParameters(stmt, params);
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate();
         }
     }
 
