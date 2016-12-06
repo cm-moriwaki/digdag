@@ -95,6 +95,9 @@ public class EmbulkOperatorFactory
             if (params.has("configpath")) {
                 String configpath = params.get("configpath", String.class);
                 pb = new ProcessBuilder("embulk", "run", tempFile, "-c", configpath);
+            } else if (params.has("guess")) {
+                String outpath = params.get("guess", String.class);
+                pb = new ProcessBuilder("embulk", "guess", tempFile, "-o", outpath);
             } else {
                 pb = new ProcessBuilder("embulk", "run", tempFile);
             }
