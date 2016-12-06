@@ -91,7 +91,13 @@ public class EmbulkOperatorFactory
                 throw Throwables.propagate(ex);
             }
 
-            ProcessBuilder pb = new ProcessBuilder("embulk", "run", tempFile);
+            final ProcessBuilder pb;
+            if (params.has("configpath")) {
+                String configpath = params.get("configpath", String.class);
+                pb = new ProcessBuilder("embulk", "run", tempFile, "-c", configpath);
+            } else {
+                pb = new ProcessBuilder("embulk", "run", tempFile);
+            }
             pb.directory(workspace.getPath().toFile());
 
             int ecode;
