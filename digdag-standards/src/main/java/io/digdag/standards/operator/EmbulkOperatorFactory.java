@@ -5,6 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import com.google.common.io.ByteStreams;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
@@ -91,16 +94,23 @@ public class EmbulkOperatorFactory
                 throw Throwables.propagate(ex);
             }
 
-            final ProcessBuilder pb;
-            if (params.has("configpath")) {
-                String configpath = params.get("configpath", String.class);
-                pb = new ProcessBuilder("embulk", "run", tempFile, "-c", configpath);
-            } else if (params.has("guess")) {
+            List<String> command = new ArrayList<>();
+            command.add("embulk");
+            if (params.has("guess")) {
                 String outpath = params.get("guess", String.class);
-                pb = new ProcessBuilder("embulk", "guess", tempFile, "-o", outpath);
+                command.addAll(Arrays.asList("guess", tempFile, "-o", outpath));
             } else {
-                pb = new ProcessBuilder("embulk", "run", tempFile);
+                command.addAll(Arrays.asList("run", tempFile));
+                if (params.has("configpath")) {
+                    String configpath = params.get("configpath", String.class);
+                    command.addAll(Arrays.asList("-c", configpath));
+                }
             }
+            if (params.has("loglevel")) {
+                String loglevel = params.get("loglevel", String.class);
+                command.addAll(Arrays.asList("--log-level", loglevel));
+            }
+            ProcessBuilder pb = new ProcessBuilder(command);
             pb.directory(workspace.getPath().toFile());
 
             int ecode;
