@@ -112,26 +112,20 @@ public class EmbulkOperatorFactory
             }
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.directory(workspace.getPath().toFile());
+            pb.inheritIO();
 
             int ecode;
-            String message;
             try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
                 Process p = exec.start(workspace.getPath(), request, pb);
-                p.getOutputStream().close();
-                try (InputStream stdout = p.getInputStream()) {
-                    ByteStreams.copy(stdout, buffer);
-                }
                 ecode = p.waitFor();
-                message = buffer.toString();
             }
             catch (IOException | InterruptedException ex) {
                 throw Throwables.propagate(ex);
             }
 
             //logger.info("Shell command message ===\n{}", message);  // TODO include task name
-            System.out.println(message);
             if (ecode != 0) {
-                throw new RuntimeException("Command failed: "+message);
+                throw new RuntimeException("Command failed: return code " + ecode);
             }
 
             return TaskResult.empty(request);
